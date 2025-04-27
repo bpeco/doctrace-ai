@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import hmac
 import hashlib
 from json import JSONDecodeError
-from utils.get_utils import get_repo_diff
+from app.utils.get_utils import get_repo_diff
 
 # Load environment variables from .env
 load_dotenv()
