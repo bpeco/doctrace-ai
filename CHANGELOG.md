@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable.
 
 2025-04-27
+* `app/agents/docs_generator.py`: Updated function `generate_docstrings` to change the newline escape character and parse JSON response.
+* `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable.
+
+2025-04-27
 * `app/agents/docs_generator.py`: Updated function `generate_docstrings` to change the newline escape character in the unified-diff patches from `"\\\\n"` to `"\n"`.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
 
