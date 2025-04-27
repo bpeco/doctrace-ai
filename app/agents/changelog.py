@@ -14,11 +14,12 @@ def generate_changelog_entry(diff_text):
     
     prompt = f"""You are a changelog expert.
     Given a unified diff, produce a Keep-a-Changelog formatted entry (date + bullet list) summarizing the changes under the [Unreleased] section.
-    Include each change as a bullet starting with the filename in backticks, followed by a colon and a concise summary.
-    If a hunk consists only of re-formatted lines or whitespace changes, omit it from the changelog.
-    Only include the files that have been changed, added, or removed. If a file has not been changed, added, or removed, do not include it in the changelog.
-    No preamble, no explanation, just the entry.
-      
+    Perform the task following these instructions:
+    1- Include each change as a bullet starting with the filename in backticks, followed by a colon and a concise summary of **what changed**.
+    2- If a hunk consists only of re-formatted lines or whitespace changes, omit it from the changelog.
+    3- Only include the files that have been changed, added, or removed. If a file has not been changed, added, or removed, do not include it in the changelog.
+    4- No preamble, no explanation, just the entry.
+
     Here is the actual unified diff on which you need to perform this task:
     ```{diff_text}```
     """
