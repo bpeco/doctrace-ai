@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from groq import Groq
 from datetime import date
 from typing import Dict
+import json
 
 
 load_dotenv()
@@ -30,7 +31,17 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
             {"role":"user", "content": user_prompt}
         ]
     )
-    return chat_completion.choices[0].message.content
+    raw = chat_completion.choices[0].message.content.strip()
+    try:
+        patches = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Invalid JSON from doc generator: {e}\nRaw response: {raw}")
+    if not isinstance(patches, dict):
+        raise RuntimeError(f"Expected JSON object, got: {type(patches)}")
+    
+    return patches
+
+
 
 
 

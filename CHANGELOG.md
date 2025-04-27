@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+2025-04-27
+* `app/agents/docs_generator.py`: Updated `generate_docstrings` function to change the role and content of the chat completion messages.
+* `main.py`: Updated `verify_github_signature` function to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
+
 2024-09-16
 * `app/agents/changelog.py`: Added function `generate_changelog_entry` to generate changelog entries.
 * `app/agents/docs_generator.py`: Added function `generate_docstrings` to generate docstrings for modified functions.
