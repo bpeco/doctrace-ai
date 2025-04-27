@@ -21,8 +21,10 @@ def generate_changelog_entry(diff_text):
 
     ```
     ## {today}
-    - <bullet point summary #1>
-    - <bullet point summary #2>
+    - **file_1**: <bullet point summary>
+    - **file_1**: <bullet point summary>
+    - **file_2**: <bullet point summary>
+    - **file_3**: <bullet point summary>
     
     
     Here is the actual unified diff on which you need to perform this task:
