@@ -19,7 +19,7 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
     "- Values are unified-diff patches as a single-line JSON string, with all newlines escaped as \"\\\\n\" and all internal quotes escaped.\n"
     "Each patch must start with \"--- a/{filename}\\n+++ b/{filename}\" etc.\n"
     "Do NOT output any other text, explanations, or markdown bullets.\n"
-    "No preamble, no initial backticks, just the JSON object.\n"
+    "No preamble, no initial backticks.\n"
     "Example output:\n"
     "{\n"
     "  \"app/main.py\": \"--- a/app/main.py\\\\n+++ b/app/main.py\\\\n@@ -10,3 +10,7 @@ ...\",\n"
