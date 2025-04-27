@@ -42,12 +42,8 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
         ],
     )
     raw = chat.choices[0].message.content.strip()
-    raw = raw.replace("\n", "\\n")
     try:
         patches = json.loads(raw)
-        # Después reexpande:
-        for p in patches:
-            patches[p] = patches[p].encode("utf-8").decode("unicode_escape")
     except json.JSONDecodeError as e:
         raise RuntimeError(f"Invalid JSON from doc generator: {e}\nRaw response: {raw}")
     if not isinstance(patches, dict):
