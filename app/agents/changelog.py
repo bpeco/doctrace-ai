@@ -19,15 +19,13 @@ def generate_changelog_entry(diff_text):
     Only include the files that have been changed, added, or removed. If a file has not been changed, added, or removed, do not include it in the changelog.
     No preamble, no explanation, just the entry.
     
-    Output format:
+    Generic Output format:
     ```
     ## {today}
-    - **file_1**: <bullet point summary>
-    - **file_2**: <bullet point summary>
-    - **file_3**: <bullet point summary>
+    - `folder/file.extension`: <summary>.
     ```
 
-    Example format:
+    Example output format:
     ```
     ### {today}
     - `app/main.py`: Added verification to ignore non-main branch pushes.
