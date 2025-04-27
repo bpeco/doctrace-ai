@@ -5,3 +5,4 @@ PyGithub
 openai
 langchain
 python-dotenv
+groq
