@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import hmac
 import hashlib
 from json import JSONDecodeError
+from utils.get_utils import get_repo_diff
 
 # Load environment variables from .env
 load_dotenv()
@@ -67,9 +68,28 @@ async def webhook_receiver(
     except JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    # Extract commits for demonstration (to replace with diff extraction)
-    commits = payload.get("commits", [])
-    return {"status": "received", "commit_count": len(commits)}
+    # Extract old and new revisions from payload
+    old_rev = payload.get("before")
+    new_rev = payload.get("after")
+    if not old_rev or not new_rev:
+        raise HTTPException(status_code=400, detail="Missing before or after revisions in payload")
+
+    # Determine repository path (assumes current working dir)
+    repo_path = os.getcwd()
+
+    # Extract changed files and diff text
+    try:
+        changed_files, diff_text = get_repo_diff(repo_path, old_rev, new_rev)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extracting diff: {e}")
+
+    # Respond with basic diff info (for testing)
+    return {
+        "status": "received",
+        "commit_count": len(payload.get("commits", [])),
+        "changed_files": changed_files,
+        "diff_snippet": diff_text[:1000]  # first 1000 chars
+    }
 
 if __name__ == "__main__":
     import uvicorn
