@@ -14,18 +14,24 @@ def generate_changelog_entry(diff_text):
     
     prompt = f"""You are a changelog expert.
     Given a unified diff, produce a Keep-a-Changelog formatted entry (date + bullet list) summarizing the changes under the [Unreleased] section.
+    Include each change as a bullet starting with the filename in backticks, followed by a colon and a concise summary.
     If a hunk consists only of re-formatted lines or whitespace changes, omit it from the changelog.
     No preamble, no explanation, just the entry.
     
     Output format:
-
     ```
     ## {today}
     - **file_1**: <bullet point summary>
-    - **file_1**: <bullet point summary>
     - **file_2**: <bullet point summary>
     - **file_3**: <bullet point summary>
-    
+    ```
+
+    Example format:
+    ```
+    ### {today}
+    - `app/main.py`: Added verification to ignore non-main branch pushes.
+    - `utils/get_utils.py`: Implemented get_repo_diff function to extract diffs between SHAs.
+    ```
     
     Here is the actual unified diff on which you need to perform this task:
     ```{diff_text}```
