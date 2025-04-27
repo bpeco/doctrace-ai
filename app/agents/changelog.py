@@ -18,13 +18,7 @@ def generate_changelog_entry(diff_text):
     If a hunk consists only of re-formatted lines or whitespace changes, omit it from the changelog.
     Only include the files that have been changed, added, or removed. If a file has not been changed, added, or removed, do not include it in the changelog.
     No preamble, no explanation, just the entry.
-    
-    Generic Output format:
-    ```
-    ## {today}
-    - `folder/file.extension`: <summary>.
-    ```
-    
+      
     Here is the actual unified diff on which you need to perform this task:
     ```{diff_text}```
     """
