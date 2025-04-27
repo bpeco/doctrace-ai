@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## 2025-04-27
+- `app/main.py`: Added verification to ignore non-main branch pushes.
+- `utils/get_utils.py`: Implemented get_repo_diff function to extract diffs between SHAs.
+
 ## [Unreleased] - 2025-04-27
 - Added `GITHUB_REPO` variable to store the repository identifier in the format "owner/repo" from environment variable.
 - Updated `verify_github_signature` function to include a description in its docstring.
