@@ -24,13 +24,6 @@ def generate_changelog_entry(diff_text):
     ## {today}
     - `folder/file.extension`: <summary>.
     ```
-
-    Example output format:
-    ```
-    ### {today}
-    - `app/main.py`: Added verification to ignore non-main branch pushes.
-    - `utils/get_utils.py`: Implemented get_repo_diff function to extract diffs between SHAs.
-    ```
     
     Here is the actual unified diff on which you need to perform this task:
     ```{diff_text}```
