@@ -21,3 +21,5 @@ Microservice powered by AI-Agent for automatic generation of Google-style docstr
    ```bash
    git clone https://github.com/<your-username>/doctrace-ai.git
    cd doctrace-ai
+
+_Test commit for diff extraction_
