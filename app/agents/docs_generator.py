@@ -17,7 +17,9 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
     3- If a function has been removed, do not generate a docstring for it.
     4- If a function has not been changed, added, or removed, do not generate a docstring for it.
     5- No preamble, no explanation, just return the answer in the following JSON format only: ```{{"filename": <file_path>, "patch": <docstring_patch>"}}```.
-    6- Each patch must begin with "*** Begin Patch ***" and end with "*** End Patch ***"."""
+    6- Each patch must begin with "*** Begin Patch ***" and end with "*** End Patch ***".
+    7- Return one single JSON object with all the patches. Each key is the file path and the value is the patch.
+    8- If no patches are generated, return an empty JSON object."""
 
     user_prompt = f"""Here is the actual unified diff on which you need to perform this
     task:
