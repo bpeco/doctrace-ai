@@ -20,7 +20,7 @@ def generate_changelog_entry(diff_text):
     Output format:
 
     ```
-    ## [Unreleased] - {today}
+    ## {today}
     - <bullet point summary #1>
     - <bullet point summary #2>
     
