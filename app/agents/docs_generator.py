@@ -16,7 +16,7 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
     "Given a unified diff of code changes, generate or update Google-style docstrings\n"
     "for each modified function. Output ONE valid JSON object where:\n"
     "- Keys are file paths.\n"
-    "- Values are unified-diff patches as a single-line JSON string, with all newlines escaped as \"\\\\n\" and all internal quotes escaped.\n"
+    "- Values are unified-diff patches as a single-line JSON string, with all newlines escaped as \"\n\" and all internal quotes escaped.\n"
     "Each patch must start with \"--- a/{filename}\\n+++ b/{filename}\" etc.\n"
     "Do NOT output any other text, explanations, or markdown bullets.\n"
     "No preamble, no initial backticks or data type beeing returned.\n"
