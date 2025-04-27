@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 2025-04-27
+* `app/agents/docs_generator.py`: Updated `generate_docstrings` function to parse JSON response, validate its format, change the role and content of chat completion messages, and return a single JSON object with all patches.
+* `main.py`: Updated `verify_github_signature` function to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
+
+2025-04-27
 * `app/agents/docs_generator.py`: Updated `generate_docstrings` function to parse JSON response and validate its format.
 * `main.py`: Updated `verify_github_signature` function to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
 
