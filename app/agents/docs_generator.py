@@ -30,7 +30,9 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
         Process the following unified diff:
         ```diff
         {diff_text}
-        ```"""
+        ```
+        
+        Remember: No preamble, no initial backticks, just the JSON object."""
 
     chat = groq.chat.completions.create(
         model="llama-3.3-70b-versatile",
