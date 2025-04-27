@@ -9,6 +9,7 @@ from utils.get_utils import get_repo_diff
 # Load environment variables from .env
 load_dotenv()
 
+
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
