@@ -26,10 +26,8 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
     chat_completion=groq.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role":"system", "content": system_prompt},
+            {"role":"user", "content": user_prompt}
         ]
     )
     return chat_completion.choices[0].message.content
