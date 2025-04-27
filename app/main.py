@@ -15,11 +15,10 @@ from app.agents.changelog import generate_changelog_entry
 load_dotenv()
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_REPO = os.getenv("GITHUB_REPO")  # owner/repo
 PORT = int(os.getenv("PORT", 8000))
-# GitHub repo identifier (e.g. "owner/repo")
-GITHUB_REPO = os.getenv("GITHUB_REPO")
 
-# Prepare local and remote Git clients
+# Local and remote repo clients
 REPO_PATH = os.getcwd()
 LOCAL_REPO = Repo(REPO_PATH)
 GH_CLIENT = Github(GITHUB_TOKEN)
@@ -35,7 +34,7 @@ app = FastAPI(
 async def root():
     return {"message": "doctrace-ai is up and running"}
 
-# Signature verification helper
+# Helper: verify GitHub webhook signature
 def verify_github_signature(payload_body: bytes, signature_header: str):
     if not GITHUB_WEBHOOK_SECRET:
         raise HTTPException(status_code=500, detail="Webhook secret not configured")
@@ -60,22 +59,28 @@ async def webhook_receiver(
     x_hub_signature_256: str = Header(None, alias="X-Hub-Signature-256"),
     x_github_event: str = Header(None, alias="X-GitHub-Event"),
 ):
-    # Only ping or push events
+    # Ping endpoint
     if x_github_event == "ping":
         return {"status": "pong"}
+    # Only handle push events
     if x_github_event != "push":
         return {"status": "ignored", "event": x_github_event}
 
-    # Read payload bytes and verify signature
-    payload_bytes = await request.body()
-    signature_header = x_hub_signature_256 or x_hub_signature
-    verify_github_signature(payload_bytes, signature_header)
+    # Read raw payload and verify signature
+    payload_body = await request.body()
+    sig_header = x_hub_signature_256 or x_hub_signature
+    verify_github_signature(payload_body, sig_header)
 
     # Parse JSON payload
     try:
-        payload = json.loads(payload_bytes.decode())
+        payload = json.loads(payload_body.decode())
     except JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+    # Only process pushes to main branch
+    ref = payload.get("ref")
+    if ref != "refs/heads/main":
+        return {"status": "ignored", "ref": ref}
 
     # Extract commit SHAs
     old_rev = payload.get("before")
@@ -83,7 +88,7 @@ async def webhook_receiver(
     if not old_rev or not new_rev:
         raise HTTPException(status_code=400, detail="Missing revisions in payload")
 
-    # Get diff and changed files
+    # Get unified diff and changed files
     try:
         changed_files, diff_text = get_repo_diff(REPO_PATH, old_rev, new_rev)
     except Exception as e:
@@ -92,15 +97,14 @@ async def webhook_receiver(
     # Generate changelog entry
     entry = generate_changelog_entry(diff_text)
 
-    # Append to CHANGELOG.md under Unreleased
-    changelog_path = os.path.join(REPO_PATH, "CHANGELOG.md")
-    with open(changelog_path, "r+") as f:
+    # Append entry under Unreleased in CHANGELOG.md
+    changelog_file = os.path.join(REPO_PATH, "CHANGELOG.md")
+    with open(changelog_file, "r+") as f:
         content = f.read()
         marker = "## [Unreleased]"
         idx = content.find(marker)
         if idx == -1:
             raise HTTPException(status_code=500, detail="CHANGELOG.md missing [Unreleased] section")
-        # Insert entry on new lines
         head = content[: idx + len(marker) ]
         tail = content[idx + len(marker) :]
         new_content = head + "\n" + entry + "\n" + tail
@@ -108,18 +112,17 @@ async def webhook_receiver(
         f.write(new_content)
         f.truncate()
 
-    # Commit and push changes
-    branch_name = f"auto/docs-{new_rev[:7]}"
-    LOCAL_REPO.git.checkout("-b", branch_name)
+    # Create branch, commit, push, and open PR
+    branch = f"auto/docs-{new_rev[:7]}"
+    LOCAL_REPO.git.checkout("-b", branch)
     LOCAL_REPO.index.add(["CHANGELOG.md"])
     LOCAL_REPO.index.commit(f"chore: update changelog for {new_rev[:7]}")
-    LOCAL_REPO.remotes.origin.push(branch_name)
+    LOCAL_REPO.remotes.origin.push(branch)
 
-    # Open a pull request
     pr = GH_REPO.create_pull(
         title=f"docs: update changelog for {new_rev[:7]}",
         body="Automated changelog update",
-        head=branch_name,
+        head=branch,
         base="main",
     )
 
