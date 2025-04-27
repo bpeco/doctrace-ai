@@ -29,16 +29,14 @@ def verify_github_signature(payload_body: bytes, signature_header: str):
         raise HTTPException(status_code=500, detail="Webhook secret not configured")
     if not signature_header:
         raise HTTPException(status_code=400, detail="Missing signature header")
-    # Determine signature scheme and digest algorithm
     if signature_header.startswith("sha256="):
-        sha_name, signature = signature_header.split("=", 1)
+        _, signature = signature_header.split("=", 1)
         digestmod = hashlib.sha256
     elif signature_header.startswith("sha1="):
-        sha_name, signature = signature_header.split("=", 1)
+        _, signature = signature_header.split("=", 1)
         digestmod = hashlib.sha1
     else:
         raise HTTPException(status_code=400, detail="Unsupported signature type")
-    # Compute HMAC
     mac = hmac.new(GITHUB_WEBHOOK_SECRET.encode(), msg=payload_body, digestmod=digestmod)
     if not hmac.compare_digest(mac.hexdigest(), signature):
         raise HTTPException(status_code=401, detail="Invalid signature")
@@ -50,7 +48,7 @@ async def webhook_receiver(
     x_hub_signature_256: str = Header(None, alias="X-Hub-Signature-256"),
     x_github_event: str = Header(None, alias="X-GitHub-Event"),
 ):
-    # Handle ping event without processing body
+    # Handle ping event
     if x_github_event == "ping":
         return {"status": "pong"}
 
@@ -58,12 +56,9 @@ async def webhook_receiver(
     if x_github_event != "push":
         return {"status": "ignored", "event": x_github_event}
 
-    # Verify signature
-    signature_header = x_hub_signature_256 or x_hub_signature
-    if not signature_header:
-        raise HTTPException(status_code=400, detail="Missing signature header")
-
+    # Read raw body for signature verification
     payload_bytes = await request.body()
+    signature_header = x_hub_signature_256 or x_hub_signature
     verify_github_signature(payload_bytes, signature_header)
 
     # Parse JSON payload
@@ -72,7 +67,7 @@ async def webhook_receiver(
     except JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON payload")
 
-    # Extract commits for demonstration (to be replaced with diff extraction)
+    # Extract commits for demonstration (to replace with diff extraction)
     commits = payload.get("commits", [])
     return {"status": "received", "commit_count": len(commits)}
 
