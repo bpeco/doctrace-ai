@@ -85,7 +85,7 @@ def apply_doc_patches(diff: str) -> list:
         tmp = tempfile.NamedTemporaryFile(mode='w', delete=False)
         tmp.write(text)
         tmp.close()
-        LOCAL_REPO.git.apply(tmp.name)
+        LOCAL_REPO.git.apply('--unidiff-zero', tmp.name)
     return list(patches.keys())
 
 
