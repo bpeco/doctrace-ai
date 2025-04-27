@@ -12,15 +12,22 @@ def generate_docstrings(diff_text: str) -> Dict[str, str]:
     based on the provided unified diff. Returns a dict mapping file paths
     to unified diff patch strings.
     """
-    system_msg = """You are a Python documentation expert. "
-        Given a unified diff of code changes, generate or update Google-style docstrings for each modified function. 
-        Output only a single JSON object mapping each filename to a valid unified diff patch. 
-        Each patch must start with '--- a/{filename}' and '+++ b/{filename}', followed by '@@' hunk headers, then '-' lines for removals and '+' lines for additions.
-        Do NOT include any explanations or non-diff text.
-        Return ony the JSON object with no initial backticks."""
+    system_msg = """ "You are a Python documentation expert.\n"
+    "Given a unified diff of code changes, generate or update Google-style docstrings\n"
+    "for each modified function. Output ONE valid JSON object where:\n"
+    "- Keys are file paths.\n"
+    "- Values are unified-diff patches as a single-line JSON string, with all newlines escaped as \"\\\\n\" and all internal quotes escaped.\n"
+    "Each patch must start with \"--- a/{filename}\\n+++ b/{filename}\" etc.\n"
+    "Do NOT output any other text, explanations, or markdown bullets.\n"
+    "No preamble, no initial backticks, just the JSON object.\n"
+    "Example output:\n"
+    "{\n"
+    "  \"app/main.py\": \"--- a/app/main.py\\\\n+++ b/app/main.py\\\\n@@ -10,3 +10,7 @@ ...\",\n"
+    "  \"utils/get_utils.py\": \"--- a/utils/get_utils.py\\\\n+++ b/utils/get_utils.py\\\\n@@ -1,1 +1,5 ...\"\n"
+    "}"""
     
     user_msg = f"""
-        Here is the unified diff to process:
+        Process the following unified diff:
         ```diff
         {diff_text}
         ```"""
