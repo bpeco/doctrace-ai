@@ -50,17 +50,29 @@ def verify_signature(payload: bytes, signature: str):
         raise HTTPException(401, "Invalid signature")
 
 
-def extract_diff(payload: dict) -> tuple[list, str]:
-    """Extract changed_files list and unified diff between commits."""
-    old = payload.get("before")
+def extract_diff(payload: dict, base_branch: str | None = None) -> tuple[list, str]:
+    """
+    Extrae la lista de archivos cambiados y el diff unificado entre commits.
+    Si se pasa base_branch, lo compara contra la cabeza de esa rama.
+    """
+    # Si nos piden comparar contra otra rama (p.ej. 'main')
+    if base_branch:
+        LOCAL_REPO.remotes.origin.fetch(base_branch)
+        old = LOCAL_REPO.commit(base_branch).hexsha
+    else:
+        old = payload.get("before")
+
     new = payload.get("after")
     if not old or not new:
         raise HTTPException(400, "Missing before/after revisions")
+
     try:
         files, diff = get_repo_diff(REPO_PATH, old, new)
     except Exception as e:
         raise HTTPException(500, f"Error extracting diff: {e}")
+
     return files, diff
+
 
 
 def update_changelog(diff: str) -> None:
@@ -113,34 +125,44 @@ async def webhook_receiver(
     x_signature256: str = Header(None, alias="X-Hub-Signature-256"),
     x_event: str = Header(None, alias="X-GitHub-Event")
 ):
-    # Health-checks
-    if x_event == "ping":
-        return {"status": "pong"}
+    # Filter events to only process push events
     if x_event != "push":
         return {"status": "ignored", "event": x_event}
 
+    # Signature verification
     body = await request.body()
     sig = x_signature256 or x_signature
     verify_signature(body, sig)
 
+    # Payload parsing
     try:
         payload = json.loads(body.decode())
     except JSONDecodeError:
         raise HTTPException(400, "Invalid JSON body")
 
-    if payload.get("ref") != "refs/heads/main":
-        return {"status": "ignored", "ref": payload.get("ref")}
+    # Solo ramas heads
+    ref = payload.get("ref")
+    if not ref or not ref.startswith("refs/heads/"):
+        return {"status": "ignored", "ref": ref}
+    branch = ref.replace("refs/heads/", "")
 
-    # Process changes
-    changed, diff = extract_diff(payload)
+    # Defino la rama base para diff
+    MAIN_BRANCH = "main"
+    if branch.startswith("feature/") or branch.startswith("fix/"):
+        base_branch = MAIN_BRANCH
+    else:
+        return {"status": "ignored", "ref": ref}
+
+    # Extraigo diff contra la rama base
+    changed, diff = extract_diff(payload, base_branch)
     update_changelog(diff)
-    #docs_changed = apply_doc_patches(diff)
 
-    # Commit all changes and open PR
-    files_to_commit = ["CHANGELOG.md"]# + docs_changed
+    # Commit y PR
+    files_to_commit = ["CHANGELOG.md"]
     pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
 
     return {"status": "pr_created", "pr_url": pr_url, "changed_files": changed}
+
 
 if __name__ == "__main__":
     import uvicorn
