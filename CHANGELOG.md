@@ -10,6 +10,12 @@ All notable changes to this project will be documented in this file.
 - `app/main.py`: enhance `webhook_receiver` to only handle push events, verify signatures, parse JSON bodies, restrict to `refs/heads/*`, determine a `base_branch` based on branch naming, and pass it to `extract_diff`
 
 ## 2023-10-07
+- `.DS_Store`: updated binary metadata  
+- `app/main.py`: require a YYYY-MM-DD date heading in `generate_changelog_entry` docstring  
+- `app/main.py`: extend `extract_diff` to accept an optional `base_branch`, fetch and compare against it, and update its docstring  
+- `app/main.py`: enhance `webhook_receiver` to only handle push events, verify signatures, parse JSON bodies, restrict to `refs/heads/*`, determine a `base_branch` based on branch naming, and pass it to `extract_diff`
+
+## 2023-10-07
 - `.DS_Store`: updated binary metadata file  
 - `app/main.py`: added requirement for a YYYY-MM-DD date heading in `generate_changelog_entry` docstring  
 - `app/main.py`: extended `extract_diff` to accept an optional `base_branch`, fetch and compare against it, and updated its docstring  
