@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## 2023-10-07
+- `app/main.py`: Added step to `generate_changelog_entry` docstring to require a YYYY-MM-DD date heading.  
+- `app/main.py`: Extended `extract_diff` to accept an optional `base_branch`, fetch and compare against it, and updated its docstring.  
+- `app/main.py`: Enhanced `webhook_receiver` to only handle push events, verify signatures, parse JSON bodies, filter `refs/heads/*`, and determine a `base_branch` for diff extraction.
+
 2025-04-27
 * `app/agents/docs_generator.py`: Updated function `generate_docstrings` to parse JSON response, validate its format, change the role and content of chat completion messages, and return a single JSON object with all patches.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
