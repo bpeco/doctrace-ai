@@ -25,6 +25,8 @@ def generate_changelog_entry(diff_text):
     3- Only include the files that have been changed, added, or removed. If a file has not been changed, added, or removed, do not include it in the changelog.
     4- No preamble, no explanation, just the entry.
     5- Specify the date of the changes in YYYY-MM-DD format before the bullet list. Use a heading level 2 (##) for the date.
+    6- Summarize the changes in a concise and clear manner for each file. One bullet point per file.
+    7- Do not consider comments as a meaningful change.
 
     Here is the actual unified diff on which you need to perform this task:
     ```{diff_text}```
