@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 2025-04-27
+* `app/agents/docs_generator.py`: Updated function `generate_docstrings` to parse JSON responses, validate their format, adjust chat completion message roles and content, and return a single JSON object with all patches.
+* `main.py`: Enhanced `verify_github_signature` by adding a descriptive docstring and introducing a `GITHUB_REPO` variable.
+* `app/agents/changelog.py`: Replaced `groq`-based completions with an `OpenAI` client—added `os` and `OpenAI` imports, switched the model to `"o4-mini"`, and preserved the old code in comments.
+* `main.py`: Modified `webhook_receiver` to comment out documentation patching and limit `files_to_commit` to only include `CHANGELOG.md`.
+
+2025-04-27
 * `app/agents/docs_generator.py`: Updated function `generate_docstrings` to parse JSON response, validate its format, change the role and content of chat completion messages, and return a single JSON object with all patches.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
 
