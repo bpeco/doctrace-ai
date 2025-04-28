@@ -4,13 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ## 2025-04-27
-<<<<<<< HEAD
-=======
 * `CHANGELOG.md`: Standardized the [Unreleased] section headings and unified date formatting.  
 * `main.py`: Extended `extract_diff` to accept a `base_branch` for comparisons; refined `webhook_receiver` to filter non-push events and non-branch refs, determine the base branch, and improve signature and payload handling.
 
 2025-04-27
->>>>>>> auto/docs-282f2b2
 * `app/agents/docs_generator.py`: Updated function `generate_docstrings` to parse JSON response, validate its format, change the role and content of chat completion messages, and return a single JSON object with all patches.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
 
