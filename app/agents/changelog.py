@@ -1,10 +1,15 @@
 from dotenv import load_dotenv
 from groq import Groq
 from datetime import date
+import os
+from openai import OpenAI
 
 
 load_dotenv()
 groq = Groq()
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
 
 
 
@@ -24,16 +29,22 @@ def generate_changelog_entry(diff_text):
     ```{diff_text}```
     """
 
-    chat_completion=groq.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
+    #chat_completion=groq.chat.completions.create(
+    #    model="llama-3.3-70b-versatile",
+    #    messages=[
+    #        {
+    #            "role": "user",
+     #           "content": prompt
+     #       }
+    #   ]
+    #)
+    completion = client.chat.completions.create(
+        model="o4-mini",                # o "gpt-3.5-turbo", según tu cuota
+        messages=[{"role": "user", "content": prompt}]
     )
-    return chat_completion.choices[0].message.content.strip()
+
+    return completion.choices[0].message.content.strip()
+    #return chat_completion.choices[0].message.content.strip()
 
 if __name__ == "__main__":
     print(generate_changelog_entry(

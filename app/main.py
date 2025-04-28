@@ -134,10 +134,10 @@ async def webhook_receiver(
     # Process changes
     changed, diff = extract_diff(payload)
     update_changelog(diff)
-    docs_changed = apply_doc_patches(diff)
+    #docs_changed = apply_doc_patches(diff)
 
     # Commit all changes and open PR
-    files_to_commit = ["CHANGELOG.md"] + docs_changed
+    files_to_commit = ["CHANGELOG.md"]# + docs_changed
     pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
 
     return {"status": "pr_created", "pr_url": pr_url, "changed_files": changed}
