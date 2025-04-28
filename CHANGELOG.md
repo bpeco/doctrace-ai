@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+## 2024-06-20
+- `.DS_Store`: updated binary file  
+- `app/main.py`: updated `generate_changelog_entry` docstring to include step for date heading  
+- `app/main.py`: extended `extract_diff` to accept an optional `base_branch` and fetch/compare against it  
+- `app/main.py`: enhanced `webhook_receiver` to process only push events, verify signatures, parse JSON payloads, restrict to heads, route feature/* and fix/* branches against `main`, and pass `base_branch` into `extract_diff`
+
 2025-04-27
 * `app/agents/docs_generator.py`: Updated function `generate_docstrings` to parse JSON response, validate its format, change the role and content of chat completion messages, and return a single JSON object with all patches.
 * `main.py`: Updated function `verify_github_signature` to include a description in its docstring and added `GITHUB_REPO` variable to store the repository identifier.
