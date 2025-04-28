@@ -148,7 +148,7 @@ async def webhook_receiver(
 
     # Defino la rama base para diff
     MAIN_BRANCH = "main"
-    if branch.startswith("feature/") or branch.startswith("fix/") or branch.startswith("auto/docs-"):
+    if branch.startswith("feature/") or branch.startswith("fix/"):
         base_branch = MAIN_BRANCH
     else:
         return {"status": "ignored", "ref": ref}
