@@ -1,26 +1,21 @@
-# doctrace-ai
+# Doctrace-AI 🧠
 
-Microservice powered by AI-Agent for automatic generation of Google-style docstrings and a Keep-a-Changelog-compliant CHANGELOG from GitHub push events.
+Doctrace-AI is an AI-powered documentation automation tool that generates changelog entries and Python docstrings directly from Git commit diffs. It is designed to run as a webhook listener that integrates seamlessly with GitHub workflows.
 
-## Features
+## 🚀 Features
 
-- **Docstring Updater**: Detects modified Python functions and classes, regenerates their docstrings.
-- **Changelog Generator**: Appends a human-readable changelog entry on every push.
-- **Auto-PR**: Creates a branch `auto/docs-<hash>`, commits docs + changelog, and opens a pull request.
+- Listens to GitHub webhooks for specific branches (e.g. `auto/docs-*`)
+- Parses commit diffs automatically
+- Generates:
+  - **Changelog entries** (Keep-a-Changelog format)
+  - **Google-style Python docstrings**
+- Applies diffs locally and commits the new documentation
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Web Framework**: FastAPI  
-- **AI**: Llama AI via LangChain Agents  
-- **Git Integration**: GitPython & PyGithub  
-- **Containerization**: Docker
-- 
-## Getting Started
-
-1. Clone the repo:  
-   ```bash
-   git clone https://github.com/<your-username>/doctrace-ai.git
-   cd doctrace-ai
-
-_Test commit for diff extraction_
-_And here is Test Number 2_
+- **Python 3.12**
+- **FastAPI** – Webhook receiver & API layer
+- **GitPython** – Git diff processing
+- **OpenAI API** – Language model to generate changelogs and docstrings
+- **Poetry** – Dependency management
+- **Docker** (optional)
