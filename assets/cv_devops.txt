@@ -1,0 +1,44 @@
+Laurie Weaver
+Gomezland, Italy | acarter@hotmail.com | (534)456-3563x7143
+LinkedIn: https://linkedin.com/in/tammychapman | GitHub: https://github.com/julie48
+
+---
+
+**Professional Summary**  
+DevOps Engineer with 6+ years of experience automating infrastructure, implementing CI/CD pipelines, and optimizing cloud deployments. Strong background in containerization and site reliability engineering.
+
+---
+
+**Skills**  
+- Tools: Docker, Kubernetes, Jenkins, GitLab CI  
+- Cloud: AWS, GCP, Terraform  
+- Monitoring: Prometheus, Grafana, ELK Stack
+
+---
+
+**Professional Experience**
+
+**DevOps Engineer** – Davis Ltd
+East Gina, Iran | Feb 2019 – Present  
+- Developed and maintained scalable CI/CD pipelines for microservices.  
+- Automated infrastructure provisioning using Terraform and Ansible.  
+- Reduced deployment time by 60% and improved reliability of cloud systems.
+
+---
+
+**Projects**
+Cloud Infrastructure Revamp  
+- Migrated on-prem systems to AWS using Infrastructure as Code practices.  
+- Deployed monitoring stack and set up alerting for critical services.
+
+---
+
+**Education**  
+BSc in Systems Engineering – Becker, Howe and Rangel University  
+Davidport, Saint Kitts and Nevis | Graduated 2017
+
+---
+
+**Languages**  
+English: Fluent  
+Spanish: Intermediate
