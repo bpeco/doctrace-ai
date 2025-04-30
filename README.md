@@ -2,6 +2,9 @@
 
 Doctrace-AI is an AI-powered tool that generates changelog entries and Python docstrings automatically based on Git commit diffs. It listens for GitHub webhooks and updates your repository with the generated documentation.
 
+## 🔧 Pipeline
+![Workflow Diagram](assets/diagram.png)
+
 ## 🚀 Features
 
 - Listens to GitHub webhooks for specific branches (e.g. `auto/docs-*`)
