@@ -187,9 +187,11 @@ async def webhook_receiver(
         head = payload.get("head_commit", {})
         msg = head.get("message", "")
 
-        # Skip our own release‐bump commit
         if msg.startswith("chore: release changelog"):
             return {"status": "ignored", "reason": "release bump"}
+
+        if msg.startswith("Merge pull request") and "auto/docs-" in msg:
+            return {"status": "ignored", "reason": "docs merge"}
 
         if ref == "refs/heads/main":
             old = payload.get("before")
@@ -216,7 +218,7 @@ async def webhook_receiver(
 
         return {"status": "ignored", "event": x_event}
 
-    elif x_event == "pull_request":
+    if x_event == "pull_request":
         action = payload.get("action")
         pr = payload.get("pull_request", {})
         merged = pr.get("merged")
@@ -226,8 +228,6 @@ async def webhook_receiver(
         if action == "closed" and merged and base_ref == "main" and head_ref.startswith("auto/docs-"):
             bump_release_changelog()
             return {"status": "changelog_released", "date": date.today().isoformat()}
-
-        return {"status": "ignored", "event": x_event}
 
     return {"status": "ignored", "event": x_event}
 
