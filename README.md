@@ -11,6 +11,14 @@ Doctrace-AI is an AI-powered tool that generates changelog entries automatically
 - When that PR is merged, a webhook converts `## [Unreleased]` into `## YYYY-MM-DD` (today’s date) and resets an empty `## [Unreleased]` section  
 - The release bump is committed and pushed automatically
 
+## 📊 Pipeline Diagrams
+
+### 🔄 Generic Pipeline
+![Generic Pipeline](assets/genericPipeline.png)
+
+### 📈 Detailed Pipeline
+![Detailed Pipeline](assets/detailedPipeline.png)
+
 ## 🚀 Features
 
 - **GitHub webhooks**  
