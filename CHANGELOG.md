@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2024-06-06
+- `webhook.py`: Added debug `print` statements to log checks for “chore: generate changelog entry for [Unreleased]” and “chore: update changelog and docs for” message prefixes.
+
 ## [Released]
 
 ## 2025-04-27
