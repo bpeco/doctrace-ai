@@ -14,8 +14,6 @@ client = OpenAI(
 
 
 def generate_changelog_entry(diff_text):
-
-    today = date.today().isoformat()
     
     prompt = f"""You are a changelog expert.
     Given a unified diff, produce a Keep-a-Changelog formatted entry (date + bullet list) summarizing the changes under the [Unreleased] section.
@@ -28,9 +26,10 @@ def generate_changelog_entry(diff_text):
     6- Summarize the changes in a concise and clear manner for each file. One bullet point per file.
     7- Do not consider comments as a meaningful change.
     8- Do not include hidden files (those starting with a dot) in the changelog.
+    9- Do not include the changelog entry itself in the changelog.
 
     Here is the actual unified diff on which you need to perform this task:
-    ```{diff_text}```
+    ```{diff_text}```.
     """
 
     #chat_completion=groq.chat.completions.create(
