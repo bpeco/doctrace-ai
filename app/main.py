@@ -187,6 +187,8 @@ async def webhook_receiver(
         head = payload.get("head_commit", {})
         msg = head.get("message", "")
 
+        print(f'<<<<< DEBUG msg >>>>>> ----> {msg}')
+
         if msg.startswith("chore: release changelog"):
             return {"status": "ignored", "reason": "release bump"}
 
