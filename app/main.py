@@ -13,6 +13,7 @@ from app.utils.get_utils import get_repo_diff
 from app.agents.changelog import generate_changelog_entry
 from app.agents.docs_generator import generate_docstrings
 import uvicorn
+import re
 
 
 # Load environment variables
