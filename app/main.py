@@ -182,44 +182,55 @@ async def webhook_receiver(
     verify_signature(body, sig)
     payload = json.loads(body.decode())
 
-    # Filter events to only process push events
     if x_event == "push":
-            print('<<<<<< Debug: push event >>>>>>')
-            ref = payload.get("ref")
-            if ref == "refs/heads/main":
-                old = payload.get("before")
-                new = payload.get("after")
-                if old and new:
-                    files, diff = get_repo_diff(REPO_PATH, old, new)
-                    LOCAL_REPO.remotes.origin.fetch("main")
-                    main_ref = LOCAL_REPO.remotes.origin.refs.main
-                    branch_name = f"auto/docs-{uuid.uuid4().hex[:8]}"
-                    if branch_name in LOCAL_REPO.heads:
-                        LOCAL_REPO.delete_head(branch_name, force=True)
-                    LOCAL_REPO.create_head(branch_name, main_ref.commit)
-                    LOCAL_REPO.heads[branch_name].checkout()
-                    update_changelog(diff)
-                    LOCAL_REPO.git.add("CHANGELOG.md")
-                    LOCAL_REPO.index.commit("chore: generate changelog entry for [Unreleased]")
-                    LOCAL_REPO.remotes.origin.push(branch_name, force=True)
-                    pr_url = create_branch_and_pr(["CHANGELOG.md"], new)
-                    return {"status": "pr_created", "pr_url": pr_url}
-            return {"status": "ignored", "event": x_event}
-    
+        ref = payload.get("ref")
+        head = payload.get("head_commit", {})
+        msg = head.get("message", "")
+
+        # Skip our own release‐bump commit
+        if msg.startswith("chore: release changelog"):
+            return {"status": "ignored", "reason": "release bump"}
+
+        if ref == "refs/heads/main":
+            old = payload.get("before")
+            new = payload.get("after")
+            if old and new:
+                files, diff = get_repo_diff(REPO_PATH, old, new)
+
+                LOCAL_REPO.remotes.origin.fetch("main")
+                main_ref = LOCAL_REPO.remotes.origin.refs.main
+                branch_name = f"auto/docs-{uuid.uuid4().hex[:8]}"
+                if branch_name in LOCAL_REPO.heads:
+                    LOCAL_REPO.delete_head(branch_name, force=True)
+                LOCAL_REPO.create_head(branch_name, main_ref.commit)
+                LOCAL_REPO.heads[branch_name].checkout()
+
+                update_changelog(diff)
+
+                LOCAL_REPO.git.add("CHANGELOG.md")
+                LOCAL_REPO.index.commit("chore: generate changelog entry for [Unreleased]")
+                LOCAL_REPO.remotes.origin.push(branch_name, force=True)
+
+                pr_url = create_branch_and_pr(["CHANGELOG.md"], new)
+                return {"status": "pr_created", "pr_url": pr_url}
+
+        return {"status": "ignored", "event": x_event}
+
     elif x_event == "pull_request":
         action = payload.get("action")
         pr = payload.get("pull_request", {})
         merged = pr.get("merged")
         base_ref = pr.get("base", {}).get("ref")
         head_ref = pr.get("head", {}).get("ref")
+
         if action == "closed" and merged and base_ref == "main" and head_ref.startswith("auto/docs-"):
             bump_release_changelog()
-            return {"status": "changelog_released", "date": datetime.date.today().isoformat()}
+            return {"status": "changelog_released", "date": date.today().isoformat()}
 
-    else:
         return {"status": "ignored", "event": x_event}
 
-    
+    return {"status": "ignored", "event": x_event}
+
 
 
 if __name__ == "__main__":
