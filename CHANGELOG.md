@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Released]
 
+## [Unreleased]
+
+## 2025-04-27
+- `CHANGELOG.md`: Updated release headings by converting the former [Unreleased] section into a Released block and reorganized entry placement.
+- `app/agents/changelog.py`: Removed unused date import and logic, improved insertion of entries under ## [Unreleased], and added a `bump_release_changelog` helper for finalizing releases.
+- `main.py`: Cleaned up imports and refactored `webhook_receiver` to streamline push and pull_request handling, enhance signature verification, diff extraction, changelog updates, PR creation, and release bumping.
+
 ## 2025-04-27
 * `app/agents/changelog.py`: Added function `generate_changelog_entry` to generate changelog entries.
 * `main.py`: Refactored code to improve readability and maintainability, added `verify_signature` function to verify GitHub HMAC signature, added `extract_diff` function to extract changed files and unified diff, added `update_changelog` function to generate changelog entry and append under ## [Unreleased], added `apply_doc_patches` function to generate docstring patches and apply them, and added `create_branch_and_pr` function to commit given files, push branch and open a PR.
