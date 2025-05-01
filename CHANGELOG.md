@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2023-10-05
+- `webhook.py`: remove the `head=branch_name` argument from the `create_branch_and_pr` call.
+
 ## [Released]
 
 ## 2025-04-27
