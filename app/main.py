@@ -189,7 +189,7 @@ async def webhook_receiver(
 
         print(f'<<<<< DEBUG msg >>>>>> ----> {msg}')
 
-        if msg.startswith("chore: generate changelog entry for [Unreleased]"):
+        if msg.startswith("chore: generate changelog entry for [Unreleased]") or msg.startswith("chore: update changelog and docs for"):
             return {"status": "ignored", "reason": "release bump"}
 
         if msg.startswith("Merge pull request") and "auto/docs-" in msg:
