@@ -184,6 +184,7 @@ async def webhook_receiver(
 
     # Filter events to only process push events
     if x_event == "push":
+            print('<<<<<< Debug: push event >>>>>>')
             ref = payload.get("ref")
             if ref == "refs/heads/main":
                 old = payload.get("before")
