@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2024-06-13
+- `webhook.py`: added debug logging of incoming commit messages; ignored “Merge pull request” messages containing “auto/docs-”; changed pull_request check from `elif` to `if`; removed redundant return for ignored events
+
 ## [Released]
 
 ## 2025-04-27
