@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2023-10-05
+
+- `webhook.py`: extended ignored prefixes to include “chore: update changelog and docs for” alongside the existing “chore: generate changelog entry for [Unreleased]”
+
 ## [Released]
 
 ## 2025-04-27
