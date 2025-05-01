@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2024-06-01
+- `webhook_receiver.py`: Added early exit for non-main branch pushes, simplified ignore conditions for release/docs commits, consolidated diff retrieval logic, and updated pull_request handler to use `elif` with `datetime.date.today().isoformat()`.
+
 ## [Released]
 
 ## 2025-04-27
