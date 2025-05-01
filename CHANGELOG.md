@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2023-10-05
+- `webhook.py`: skip own “chore: release changelog” commits, remove debug prints, streamline push-event branch creation flow, and use `date.today().isoformat()` in pull_request handler
+
 ## [Released]
 
 ## 2025-04-27
