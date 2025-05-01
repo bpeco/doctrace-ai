@@ -12,15 +12,17 @@ from github import Github
 from app.utils.get_utils import get_repo_diff
 from app.agents.changelog import generate_changelog_entry
 from app.agents.docs_generator import generate_docstrings
+import uvicorn
+
 
 # Load environment variables
 load_dotenv()
+
+# GitHUB configuration for managing webhooks and repository
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET")
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")  # format: owner/repo
 PORT = int(os.getenv("PORT", 8000))
-
-# Initialize Git clients
 REPO_PATH = os.getcwd()
 LOCAL_REPO = Repo(REPO_PATH)
 GH_CLIENT = Github(GITHUB_TOKEN)
@@ -52,10 +54,9 @@ def verify_signature(payload: bytes, signature: str):
 
 def extract_diff(payload: dict, base_branch: str | None = None) -> tuple[list, str]:
     """
-    Extrae la lista de archivos cambiados y el diff unificado entre commits.
-    Si se pasa base_branch, lo compara contra la cabeza de esa rama.
+    Extract the list of changed files and the unified diff between commits.
+    If base_branch is provided, it compares against the head of that branch.
     """
-    # Si nos piden comparar contra otra rama (p.ej. 'main')
     if base_branch:
         LOCAL_REPO.remotes.origin.fetch(base_branch)
         old = LOCAL_REPO.commit(base_branch).hexsha
@@ -90,6 +91,7 @@ def update_changelog(diff: str) -> None:
         f.truncate()
 
 
+# Deprecated
 def apply_doc_patches(diff: str) -> list:
     """Generate docstring patches and apply them. Returns list of modified files."""
     patches = generate_docstrings(diff)
@@ -129,35 +131,30 @@ async def webhook_receiver(
     if x_event != "push":
         return {"status": "ignored", "event": x_event}
 
-    # Signature verification
     body = await request.body()
     sig = x_signature256 or x_signature
     verify_signature(body, sig)
 
-    # Payload parsing
     try:
         payload = json.loads(body.decode())
     except JSONDecodeError:
         raise HTTPException(400, "Invalid JSON body")
 
-    # Solo ramas heads
     ref = payload.get("ref")
     if not ref or not ref.startswith("refs/heads/"):
         return {"status": "ignored", "ref": ref}
     branch = ref.replace("refs/heads/", "")
 
-    # Defino la rama base para diff
+    # Define 'main' branch for diff (I could use another branch if needed)
     MAIN_BRANCH = "main"
     if branch.startswith("feature/") or branch.startswith("fix/"):
         base_branch = MAIN_BRANCH
     else:
         return {"status": "ignored", "ref": ref}
 
-    # Extraigo diff contra la rama base
     changed, diff = extract_diff(payload, base_branch)
     update_changelog(diff)
 
-    # Commit y PR
     files_to_commit = ["CHANGELOG.md"]
     pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
 
@@ -165,5 +162,4 @@ async def webhook_receiver(
 
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=PORT)
