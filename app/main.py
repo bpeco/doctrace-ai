@@ -14,6 +14,8 @@ from app.agents.docs_generator import generate_docstrings
 import uvicorn
 import re
 import datetime
+import uuid
+
 
 
 # Load environment variables
@@ -76,88 +78,69 @@ def extract_diff(payload: dict, base_branch: str | None = None) -> tuple[list, s
     return files, diff
 
 
-
-def update_changelog(diff: str) -> None:
-    """
-    Generate changelog entry and insert it under the ## [Unreleased] section.
-    """
-    entry = generate_changelog_entry(diff)
+def update_changelog(diff: str):
     path = os.path.join(REPO_PATH, "CHANGELOG.md")
+    entry = generate_changelog_entry(diff)
 
     with open(path, "r+") as f:
         lines = f.readlines()
-
-        unreleased_idx = None
-        for idx, line in enumerate(lines):
-            if line.strip() == "## [Unreleased]":
-                unreleased_idx = idx
-                break
+        unreleased_idx = next((i for i, L in enumerate(lines) if L.strip() == "## [Unreleased]"), None)
 
         if unreleased_idx is None:
-            for idx, line in enumerate(lines):
-                if re.match(r"^## \d{4}-\d{2}-\d{2}", line):
-                    unreleased_idx = idx
-                    break
-
-            if unreleased_idx is None:
-                unreleased_idx = len(lines)
-
+            first_section = next((i for i, L in enumerate(lines) if L.startswith("## ")), len(lines))
+            unreleased_idx = first_section
             lines.insert(unreleased_idx, "\n")
             lines.insert(unreleased_idx, "## [Unreleased]\n")
-
-
+        
         insert_idx = unreleased_idx + 1
+        
         while insert_idx < len(lines) and lines[insert_idx].strip() == "":
             insert_idx += 1
-
-
-        entry_lines = [ln + ("\n" if not ln.endswith("\n") else "")
-                       for ln in entry.splitlines()]
-
+        
+        entry_lines = [ln + ("\n" if not ln.endswith("\n") else "") for ln in entry.splitlines()]
         entry_lines.append("\n")
-
-
         lines[insert_idx:insert_idx] = entry_lines
-
+        
         f.seek(0)
         f.writelines(lines)
         f.truncate()
 
 def bump_release_changelog():
     path = os.path.join(REPO_PATH, "CHANGELOG.md")
+
     with open(path, "r+") as f:
         lines = f.readlines()
+        start = next((i for i, L in enumerate(lines) if L.strip() == "## [Unreleased]"), None)
 
-        try:
-            start = next(i for i, L in enumerate(lines) if L.strip() == "## [Unreleased]")
-        except StopIteration:
+        if start is None:
             return
-
+        
         end = start + 1
+        
         while end < len(lines) and not lines[end].startswith("## "):
             end += 1
-
-        bullets = lines[start+1 : end]
-
+        
+        bullets = lines[start + 1 : end]
         del lines[start:end]
-
+        
         today = datetime.date.today().isoformat()
         new_block = []
         new_block.append(f"## {today}\n")
         new_block.extend(bullets)
         new_block.append("\n")
-
+        new_block.append("## [Unreleased]\n")
+        new_block.append("\n")
         lines[start:start] = new_block
-
+        
         f.seek(0)
         f.writelines(lines)
         f.truncate()
 
-    # 8) haz commit y push de ese cambio
     LOCAL_REPO.git.add("CHANGELOG.md")
     LOCAL_REPO.index.commit(f"chore: release changelog for {today}")
     LOCAL_REPO.remotes.origin.push()
 
+    
 # Deprecated
 def apply_doc_patches(diff: str) -> list:
     """Generate docstring patches and apply them. Returns list of modified files."""
@@ -190,51 +173,48 @@ def create_branch_and_pr(files: list, rev: str) -> str:
 @app.post("/webhook")
 async def webhook_receiver(
     request: Request,
-    x_signature: str = Header(None, alias="X-Hub-Signature"),
-    x_signature256: str = Header(None, alias="X-Hub-Signature-256"),
-    x_event: str = Header(None, alias="X-GitHub-Event")
+    x_sig: str = Header(None, alias="X-Hub-Signature"),
+    x_sig256: str = Header(None, alias="X-Hub-Signature-256"),
+    x_event: str = Header(None, alias="X-GitHub-Event"),
 ):
+    body = await request.body()
+    sig = x_sig256 or x_sig
+    verify_signature(body, sig)
+    payload = json.loads(body.decode())
+
     # Filter events to only process push events
     if x_event == "push":
-        body = await request.body()
-        sig = x_signature256 or x_signature
-        verify_signature(body, sig)
-
-        try:
-            payload = json.loads(body.decode())
-        except JSONDecodeError:
-            raise HTTPException(400, "Invalid JSON body")
-
-        ref = payload.get("ref")
-        if not ref or not ref.startswith("refs/heads/"):
-            return {"status": "ignored", "ref": ref}
-        branch = ref.replace("refs/heads/", "")
-
-        # Define 'main' branch for diff (I could use another branch if needed)
-        MAIN_BRANCH = "main"
-        if branch.startswith("feature/") or branch.startswith("fix/"):
-            base_branch = MAIN_BRANCH
-        else:
-            return {"status": "ignored", "ref": ref}
-
-        changed, diff = extract_diff(payload, base_branch)
-        update_changelog(diff)
-
-        files_to_commit = ["CHANGELOG.md"]
-        pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
-        
-        return {"status": "pr_created", "pr_url": pr_url, "changed_files": changed}
-
+            ref = payload.get("ref")
+            if ref == "refs/heads/main":
+                old = payload.get("before")
+                new = payload.get("after")
+                if old and new:
+                    files, diff = get_repo_diff(REPO_PATH, old, new)
+                    LOCAL_REPO.remotes.origin.fetch("main")
+                    main_ref = LOCAL_REPO.remotes.origin.refs.main
+                    branch_name = f"auto/docs-{uuid.uuid4().hex[:8]}"
+                    if branch_name in LOCAL_REPO.heads:
+                        LOCAL_REPO.delete_head(branch_name, force=True)
+                    LOCAL_REPO.create_head(branch_name, main_ref.commit)
+                    LOCAL_REPO.heads[branch_name].checkout()
+                    update_changelog(diff)
+                    LOCAL_REPO.git.add("CHANGELOG.md")
+                    LOCAL_REPO.index.commit("chore: generate changelog entry for [Unreleased]")
+                    LOCAL_REPO.remotes.origin.push(branch_name, force=True)
+                    pr_url = create_branch_and_pr(["CHANGELOG.md"], new, head=branch_name)
+                    return {"status": "pr_created", "pr_url": pr_url}
+            return {"status": "ignored", "event": x_event}
+    
     elif x_event == "pull_request":
         action = payload.get("action")
         pr = payload.get("pull_request", {})
         merged = pr.get("merged")
         base_ref = pr.get("base", {}).get("ref")
         head_ref = pr.get("head", {}).get("ref")
-
         if action == "closed" and merged and base_ref == "main" and head_ref.startswith("auto/docs-"):
             bump_release_changelog()
             return {"status": "changelog_released", "date": datetime.date.today().isoformat()}
+
     else:
         return {"status": "ignored", "event": x_event}
 
