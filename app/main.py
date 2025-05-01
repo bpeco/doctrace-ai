@@ -188,6 +188,8 @@ async def webhook_receiver(
         msg = head.get("message", "")
 
         print(f'<<<<< DEBUG msg >>>>>> ----> {msg}')
+        print(msg.startswith("chore: generate changelog entry for [Unreleased]"))
+        print(msg.startswith("chore: update changelog and docs for"))
 
         if msg.startswith("chore: generate changelog entry for [Unreleased]") or msg.startswith("chore: update changelog and docs for"):
             return {"status": "ignored", "reason": "release bump"}
