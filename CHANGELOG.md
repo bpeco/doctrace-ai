@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## 2023-10-07
+
+- `webhook.py`: Updated the ignored commit message prefix from "chore: release changelog" to "chore: generate changelog entry for [Unreleased]".
+
 ## [Released]
 
 ## 2025-04-27
