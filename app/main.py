@@ -2,7 +2,6 @@ import os
 import json
 import hmac
 import hashlib
-from datetime import date
 import tempfile
 from fastapi import FastAPI, Request, Header, HTTPException
 from dotenv import load_dotenv
@@ -14,6 +13,7 @@ from app.agents.changelog import generate_changelog_entry
 from app.agents.docs_generator import generate_docstrings
 import uvicorn
 import re
+import datetime
 
 
 # Load environment variables
@@ -123,6 +123,40 @@ def update_changelog(diff: str) -> None:
         f.writelines(lines)
         f.truncate()
 
+def bump_release_changelog():
+    path = os.path.join(REPO_PATH, "CHANGELOG.md")
+    with open(path, "r+") as f:
+        lines = f.readlines()
+
+        try:
+            start = next(i for i, L in enumerate(lines) if L.strip() == "## [Unreleased]")
+        except StopIteration:
+            return
+
+        end = start + 1
+        while end < len(lines) and not lines[end].startswith("## "):
+            end += 1
+
+        bullets = lines[start+1 : end]
+
+        del lines[start:end]
+
+        today = datetime.date.today().isoformat()
+        new_block = []
+        new_block.append(f"## {today}\n")
+        new_block.extend(bullets)
+        new_block.append("\n")
+
+        lines[start:start] = new_block
+
+        f.seek(0)
+        f.writelines(lines)
+        f.truncate()
+
+    # 8) haz commit y push de ese cambio
+    LOCAL_REPO.git.add("CHANGELOG.md")
+    LOCAL_REPO.index.commit(f"chore: release changelog for {today}")
+    LOCAL_REPO.remotes.origin.push()
 
 # Deprecated
 def apply_doc_patches(diff: str) -> list:
@@ -161,37 +195,50 @@ async def webhook_receiver(
     x_event: str = Header(None, alias="X-GitHub-Event")
 ):
     # Filter events to only process push events
-    if x_event != "push":
+    if x_event == "push":
+        body = await request.body()
+        sig = x_signature256 or x_signature
+        verify_signature(body, sig)
+
+        try:
+            payload = json.loads(body.decode())
+        except JSONDecodeError:
+            raise HTTPException(400, "Invalid JSON body")
+
+        ref = payload.get("ref")
+        if not ref or not ref.startswith("refs/heads/"):
+            return {"status": "ignored", "ref": ref}
+        branch = ref.replace("refs/heads/", "")
+
+        # Define 'main' branch for diff (I could use another branch if needed)
+        MAIN_BRANCH = "main"
+        if branch.startswith("feature/") or branch.startswith("fix/"):
+            base_branch = MAIN_BRANCH
+        else:
+            return {"status": "ignored", "ref": ref}
+
+        changed, diff = extract_diff(payload, base_branch)
+        update_changelog(diff)
+
+        files_to_commit = ["CHANGELOG.md"]
+        pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
+        
+        return {"status": "pr_created", "pr_url": pr_url, "changed_files": changed}
+
+    elif x_event == "pull_request":
+        action = payload.get("action")
+        pr = payload.get("pull_request", {})
+        merged = pr.get("merged")
+        base_ref = pr.get("base", {}).get("ref")
+        head_ref = pr.get("head", {}).get("ref")
+
+        if action == "closed" and merged and base_ref == "main" and head_ref.startswith("auto/docs-"):
+            bump_release_changelog()
+            return {"status": "changelog_released", "date": datetime.date.today().isoformat()}
+    else:
         return {"status": "ignored", "event": x_event}
 
-    body = await request.body()
-    sig = x_signature256 or x_signature
-    verify_signature(body, sig)
-
-    try:
-        payload = json.loads(body.decode())
-    except JSONDecodeError:
-        raise HTTPException(400, "Invalid JSON body")
-
-    ref = payload.get("ref")
-    if not ref or not ref.startswith("refs/heads/"):
-        return {"status": "ignored", "ref": ref}
-    branch = ref.replace("refs/heads/", "")
-
-    # Define 'main' branch for diff (I could use another branch if needed)
-    MAIN_BRANCH = "main"
-    if branch.startswith("feature/") or branch.startswith("fix/"):
-        base_branch = MAIN_BRANCH
-    else:
-        return {"status": "ignored", "ref": ref}
-
-    changed, diff = extract_diff(payload, base_branch)
-    update_changelog(diff)
-
-    files_to_commit = ["CHANGELOG.md"]
-    pr_url = create_branch_and_pr(files_to_commit, payload.get("after"))
-
-    return {"status": "pr_created", "pr_url": pr_url, "changed_files": changed}
+    
 
 
 if __name__ == "__main__":
