@@ -202,7 +202,7 @@ async def webhook_receiver(
                     LOCAL_REPO.git.add("CHANGELOG.md")
                     LOCAL_REPO.index.commit("chore: generate changelog entry for [Unreleased]")
                     LOCAL_REPO.remotes.origin.push(branch_name, force=True)
-                    pr_url = create_branch_and_pr(["CHANGELOG.md"], new, head=branch_name)
+                    pr_url = create_branch_and_pr(["CHANGELOG.md"], new)
                     return {"status": "pr_created", "pr_url": pr_url}
             return {"status": "ignored", "event": x_event}
     
