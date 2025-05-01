@@ -77,17 +77,49 @@ def extract_diff(payload: dict, base_branch: str | None = None) -> tuple[list, s
 
 
 def update_changelog(diff: str) -> None:
-    """Generate changelog entry and append under ## [Unreleased]."""
+    """
+    Generate changelog entry and insert it under the ## [Unreleased] section.
+    """
     entry = generate_changelog_entry(diff)
     path = os.path.join(REPO_PATH, "CHANGELOG.md")
+
     with open(path, "r+") as f:
-        content = f.read()
-        if "## [Unreleased]" not in content:
-            raise HTTPException(500, "CHANGELOG.md missing [Unreleased]")
-        head, tail = content.split("## [Unreleased]", 1)
-        new = head + "## [Unreleased]" + "\n" + entry + "\n" + tail
+        lines = f.readlines()
+
+        unreleased_idx = None
+        for idx, line in enumerate(lines):
+            if line.strip() == "## [Unreleased]":
+                unreleased_idx = idx
+                break
+
+        if unreleased_idx is None:
+            for idx, line in enumerate(lines):
+                if re.match(r"^## \d{4}-\d{2}-\d{2}", line):
+                    unreleased_idx = idx
+                    break
+
+            if unreleased_idx is None:
+                unreleased_idx = len(lines)
+
+            lines.insert(unreleased_idx, "\n")
+            lines.insert(unreleased_idx, "## [Unreleased]\n")
+
+
+        insert_idx = unreleased_idx + 1
+        while insert_idx < len(lines) and lines[insert_idx].strip() == "":
+            insert_idx += 1
+
+
+        entry_lines = [ln + ("\n" if not ln.endswith("\n") else "")
+                       for ln in entry.splitlines()]
+
+        entry_lines.append("\n")
+
+
+        lines[insert_idx:insert_idx] = entry_lines
+
         f.seek(0)
-        f.write(new)
+        f.writelines(lines)
         f.truncate()
 
 

@@ -30,7 +30,8 @@ def generate_changelog_entry(diff_text):
     8- Do not include hidden files (those starting with a dot) in the changelog.
 
     Here is the actual unified diff on which you need to perform this task:
-    ```{diff_text}```
+    ```{diff_text}```.
+    The date of the changes is {today}.
     """
 
     #chat_completion=groq.chat.completions.create(
